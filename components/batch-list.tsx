@@ -1,12 +1,7 @@
 "use client"
 
 import { useState, useMemo } from "react"
-import { batches, categories, getBatchesByCategory, searchBatches, type Batch } from "@/lib/batches"
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs"
+import { batches, categories, getBatchesByCategory, type Batch } from "../lib/batches"
 import { Search, Clock, Star, ExternalLink } from "lucide-react"
 
 export function BatchList() {
@@ -33,54 +28,63 @@ export function BatchList() {
   }, [selectedCategory, searchQuery, filter])
 
   return (
-    <section id="batches" className="py-16">
+    <section id="batches" className="bg-white py-16">
       <div className="container mx-auto px-4">
         <div className="mb-10 text-center">
-          <h2 className="mb-3 text-3xl font-bold text-foreground md:text-4xl">All Batches</h2>
-          <p className="text-muted-foreground">
+          <h2 className="mb-3 text-3xl font-bold text-gray-900 md:text-4xl">All Batches</h2>
+          <p className="text-gray-600">
             Choose from {batches.length}+ batches from Spidy Universe
           </p>
         </div>
 
         <div className="mb-8 flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div className="relative w-full lg:max-w-md">
-            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
-            <Input
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
               placeholder="Search batches..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10"
+              className="w-full rounded-lg border border-gray-300 bg-white py-2.5 pl-10 pr-4 text-sm outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
             />
           </div>
 
-          <div className="flex flex-wrap gap-2">
-            <Tabs value={filter} onValueChange={(v) => setFilter(v as typeof filter)}>
-              <TabsList>
-                <TabsTrigger value="all">All</TabsTrigger>
-                <TabsTrigger value="free">Free</TabsTrigger>
-                <TabsTrigger value="premium">Premium</TabsTrigger>
-              </TabsList>
-            </Tabs>
+          <div className="flex gap-2">
+            {(["all", "free", "premium"] as const).map((f) => (
+              <button
+                key={f}
+                onClick={() => setFilter(f)}
+                className={`rounded-lg px-4 py-2 text-sm font-medium capitalize transition-colors ${
+                  filter === f
+                    ? "bg-blue-600 text-white"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                }`}
+              >
+                {f}
+              </button>
+            ))}
           </div>
         </div>
 
         <div className="mb-8 overflow-x-auto pb-2">
           <div className="flex gap-2">
             {categories.map((category) => (
-              <Button
+              <button
                 key={category.id}
-                variant={selectedCategory === category.id ? "default" : "outline"}
-                size="sm"
                 onClick={() => setSelectedCategory(category.id)}
-                className="whitespace-nowrap"
+                className={`whitespace-nowrap rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                  selectedCategory === category.id
+                    ? "bg-blue-600 text-white"
+                    : "border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+                }`}
               >
                 {category.name}
-              </Button>
+              </button>
             ))}
           </div>
         </div>
 
-        <div className="mb-4 text-sm text-muted-foreground">
+        <div className="mb-4 text-sm text-gray-500">
           Showing {filteredBatches.length} batches
         </div>
 
@@ -92,7 +96,7 @@ export function BatchList() {
 
         {filteredBatches.length === 0 && (
           <div className="py-16 text-center">
-            <p className="text-lg text-muted-foreground">No batches found matching your criteria</p>
+            <p className="text-lg text-gray-500">No batches found matching your criteria</p>
           </div>
         )}
       </div>
@@ -104,53 +108,54 @@ function BatchCard({ batch }: { batch: Batch }) {
   const categoryLabel = categories.find(c => c.id === batch.category)?.name || batch.category
 
   return (
-    <Card className="group flex flex-col overflow-hidden transition-all hover:shadow-lg">
-      <CardHeader className="pb-3">
+    <div className="group flex flex-col overflow-hidden rounded-xl border border-gray-200 bg-white transition-all hover:shadow-lg">
+      <div className="p-4 pb-2">
         <div className="flex items-start justify-between gap-2">
-          <Badge variant={batch.isFree ? "default" : "secondary"} className="shrink-0">
+          <span className={`rounded-full px-3 py-1 text-xs font-medium ${
+            batch.isFree ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
+          }`}>
             {categoryLabel}
-          </Badge>
+          </span>
           {batch.isPremium && (
-            <Badge variant="outline" className="shrink-0 border-amber-500 text-amber-600">
-              <Star className="mr-1 h-3 w-3 fill-amber-500" />
+            <span className="flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-1 text-xs font-medium text-amber-700">
+              <Star className="h-3 w-3 fill-amber-500 text-amber-500" />
               Premium
-            </Badge>
+            </span>
           )}
         </div>
-      </CardHeader>
-      <CardContent className="flex-1 pb-3">
-        <h3 className="mb-3 line-clamp-2 text-sm font-semibold leading-snug text-foreground group-hover:text-primary">
+      </div>
+      <div className="flex-1 p-4 pt-2">
+        <h3 className="mb-3 line-clamp-2 text-sm font-semibold leading-snug text-gray-900 group-hover:text-blue-600">
           {batch.name}
         </h3>
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+        <div className="flex items-center gap-2 text-xs text-gray-500">
           <Clock className="h-3 w-3" />
           <span>LIFETIME ACCESS</span>
         </div>
-      </CardContent>
-      <CardFooter className="flex items-center justify-between border-t bg-muted/30 pt-4">
+      </div>
+      <div className="flex items-center justify-between border-t border-gray-100 bg-gray-50 p-4">
         <div className="flex items-baseline gap-1">
           {batch.isFree ? (
             <span className="text-lg font-bold text-green-600">FREE</span>
           ) : (
             <>
-              <span className="text-lg font-bold text-foreground">₹{batch.price}</span>
+              <span className="text-lg font-bold text-gray-900">₹{batch.price}</span>
               {batch.originalPrice && (
-                <span className="text-sm text-muted-foreground line-through">₹{batch.originalPrice}</span>
+                <span className="text-sm text-gray-400 line-through">₹{batch.originalPrice}</span>
               )}
             </>
           )}
         </div>
-        <Button size="sm" className="gap-1" asChild>
-          <a 
-            href="https://spidyuniverserwa.vercel.app" 
-            target="_blank" 
-            rel="noopener noreferrer"
-          >
-            Enroll
-            <ExternalLink className="h-3 w-3" />
-          </a>
-        </Button>
-      </CardFooter>
-    </Card>
+        <a 
+          href="https://spidyuniverserwa.vercel.app" 
+          target="_blank" 
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-1 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
+        >
+          Enroll
+          <ExternalLink className="h-3 w-3" />
+        </a>
+      </div>
+    </div>
   )
 }
